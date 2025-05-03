@@ -90,4 +90,10 @@ memory.set(key, min_dist);
 
 $O(2^n * n)$
 
+- Used chatgpt to help debug code specifically. All code was written by me, but used chatgpt to write debug statements and work through getting `get_shortest_path()` to work properly.
 
+- Referenced https://www.geeksforgeeks.org/traveling-salesman-problem-tsp-implementation/ for algorithm analysis and Javascript code reference. All code written by me.
+
+- Referenced https://www.geeksforgeeks.org/travelling-salesman-problem-using-dynamic-programming/ for algorithm analysis and Javascript code reference. All code written by me.
+
+"I certify that I have listed all sources used to complete this exercise, including the use of any Large Language Models. All of the work is my own, except where stated otherwise. I am aware that plagiarism carries severe penalties and that if plagiarism is suspected, charges may be filed against me without prior notice."
