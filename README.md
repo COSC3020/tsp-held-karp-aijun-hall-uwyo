@@ -46,3 +46,48 @@ Test your new function; I've provided some basic testing code in `code.test.js`.
 What is the worst-case asymptotic time complexity of your implementation? What
 is the worst-case asymptotic memory complexity? Add your answer, including your
 reasoning, to this markdown file.
+
+<hr>
+
+Start from first city and check all subsets of visited cities:
+
+```
+for (let index = 0; index < n; index++) {
+  ...
+  function get_shortest_path(visited, current) {
+```
+
+$O(2^n)$ since there are $2^n$ subsets of cities (since we are using bitmasking)
+
+For each subset of visited cities, we consider every possible "current" city. In other words each subset of visited cities can end at any city in that specific subset
+`const key = ${visited},${current}`
+
+This solves a subproblem for each visited, current pair in linear time:
+$O(n)$
+
+For each visited, current pair, we then loop through all possible previous cities to find the minimum distance.
+```
+for (let index_j = 0; index_j < n; index_j++) {
+    if (index_j == current || !(visited & (1 << index_j))) {
+        continue;
+    }
+    ...
+    const recursive_cost = get_shortest_path(prev_visited, index_j);
+}
+```
+
+The inner loop runs $O(n)$ in the worst case
+
+Therefore the total runtime in the worst case is:
+$O(2^n * n^2)$
+
+For the worst-case asymptotic memory complexity, we store results for each unique visited, current pair to avoid recomputation (memoization). There are $2^n$ possible subsets and $n$ options for the current city:
+
+```
+const memory = new Map();
+memory.set(key, min_dist);
+```
+
+$O(2^n * n)$
+
+
