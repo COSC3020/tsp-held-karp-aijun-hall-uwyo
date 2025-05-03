@@ -26,3 +26,16 @@ dm = [[0,3,4,2,7],
       [2,6,5,0,6],
       [7,3,8,6,0]];
 assert(tsp_hk(dm) == 13);
+
+// All cities same distance
+dm = [[0,5,5,5],
+      [5,0,5,5],
+      [5,5,0,5],
+      [5,5,5,0]];
+assert(tsp_hk(dm) == 15);
+
+// Disconnected city/node
+dm = [[0,1,99999],
+      [1,0,1],
+      [99999,1,0]];
+assert(tsp_hk(dm) == 2);
