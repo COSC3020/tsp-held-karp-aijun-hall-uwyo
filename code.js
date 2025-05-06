@@ -4,7 +4,6 @@ function tsp_hk(distance_matrix) {
 
     // Edge cases
     if (n == 0 || n == 1) {
-        console.log(`DEBUG: TRIVIAL CASE DETECTED WITH ${n} CITIES`);
         return 0;
     }
 
@@ -13,25 +12,23 @@ function tsp_hk(distance_matrix) {
 
     // Try all possible start cities
     for (let index = 0; index < n; index++) {
-        console.log(`\nDEBUG: STARTING TOUR FROM CITY ${index}`);
         const memory = new Map();
 
         // Recursive Search with memoization
         // Return distance cost to reach 'current' from 'visited' cities
-        function get_shortest_path(visited, current) {
-            const key = `${visited},${current}`;
+        function get_shortest_path(unvisited_mask, current) {
+            const key = `${unvisited_mask},${current}`;
 
             // Already have this city pair in memory, return cached answer
             if (memory.has(key)) {
-                console.log(`DEBUG: MEMO HIT FOR (${visited}, ${current}) -> ${memory.get(key)}`);
                 return memory.get(key);
             }
 
-            // Base case: If only cities visted so far are starting city (index)
+            // Base case: If only cities checked so far are starting city (index)
             // and current city, then only cost is directly traveling between these 2 cities
-            if (visited == ((1 << index) | (1 << current))) {
+            // In bit terms the bitmask representing this situation is (1 << index) | (1 <<  current)
+            if (unvisited_mask == ((1 << index) | (1 << current))) {
                 const base_cost = distance_matrix[index][current]
-                console.log(`DEBUG: BASE CASE FROM CITY ${index} TO CITY ${current}: COST = ${base_cost}`);
                 return base_cost;
             }
 
@@ -43,31 +40,34 @@ function tsp_hk(distance_matrix) {
 
                 // Skip if:
                 // 1. city is the same as current, we can't travel to a city from itself
-                // 2. city isnt in visited, since we haven't gotten that comparison yet
-                if (index_j == current || (visited & (1 << index_j)) == false) {
+                // 2. city isnt in unvisited_mask, since we haven't gotten that comparison yet
+                // unvisited_mask & (1 << index_j) = 0 if city's bit is 0
+                if (index_j == current || (unvisited_mask & (1 << index_j)) == false) {
                     continue;
                 }
 
-                // Remove current city from visted to get subset of cities that lead up
-                // to prev city
-                const prev_visited = visited ^ (1 << current);
-                const recursive_cost = get_shortest_path(prev_visited, index_j);
+                // Remove current city to get subset of cities that lead up to prev city.
+                // current city is removed by toggling its bit off
+                // Example: visited = 0b10111 (cities {0, 1, 2, 4}), current = 2
+                // 1 << 2 = 0b00100
+                // visited ^ (1 << 2) = 0b10011 (city 2 set as cleared)
+                const prev_checked = unvisited_mask ^ (1 << current);
+                const recursive_cost = get_shortest_path(prev_checked, index_j);
                 const travel_cost = distance_matrix[index_j][current];
                 const total_cost = recursive_cost + travel_cost;
-
-                console.log(`DEBUG: TRYING PATH FROM CITY ${index_j} TO ${current}, VISITED MASK = ${visited.toString(2)}`);
-                console.log(`DEBUG: RECURSIVE COST = ${recursive_cost}, TRAVEL COST = ${travel_cost}, TOTAL = ${total_cost}`);
 
                 min_dist = Math.min(min_dist, total_cost);
             }
 
             // Cache result to not do this comparison again
             memory.set(key, min_dist);
-            console.log(`DEBUG: MEMO SET FOR (${visited}, ${current}) -> ${min_dist}`);
             return min_dist;
         }
 
-        const full_visited = (1 << n) - 1;
+        // Create bitmask with all n cities present: 0b111 ... 1
+        // (1 << n) outputs b100 ... 0, and then minus 1 creates the desired binary mask
+        // For example a 3x3 matrix would result in all_cities_mask = 0b111
+        const all_cities_mask = (1 << n) - 1;
 
         // Try all possible end destination cities
         for (let end_index = 0; end_index < n; end_index++) {
@@ -75,12 +75,10 @@ function tsp_hk(distance_matrix) {
                 continue;
             }
 
-            const cost = get_shortest_path(full_visited, end_index);
-            console.log(`DEBUG: TOUR FROM CITY ${index} TO CITY ${end_index} HAS COST ${cost}`);
+            const cost = get_shortest_path(all_cities_mask, end_index);
             min_tour_dist = Math.min(min_tour_dist, cost);
         }
     }
 
-    console.log(`\nDEBUG: SHORTEST TOUR DISTANCE FOUND: ${min_tour_dist}`);
     return min_tour_dist;
 }
